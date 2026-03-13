@@ -26,10 +26,25 @@ if (process.env.NODE_ENV === 'production') {
 const app = express();
 const prisma = new PrismaClient();
 
-// Middleware
+// CORS: allow comma-separated FRONTEND_URL and any *.vercel.app (preview deployments)
+const frontendUrls = (process.env.FRONTEND_URL || 'http://localhost:5173')
+  .split(',')
+  .map((u) => u.trim())
+  .filter(Boolean);
+// Allow all *.vercel.app origins when main frontend is on Vercel (no extra env needed)
+const allowVercelPreviews =
+  process.env.ALLOW_VERCEL_PREVIEWS === 'true' ||
+  frontendUrls.some((u) => u.includes('vercel.app'));
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
+  origin(origin, cb) {
+    if (!origin) return cb(null, true); // allow no-origin (e.g. Postman)
+    const allowed =
+      frontendUrls.includes(origin) ||
+      (allowVercelPreviews && origin.endsWith('.vercel.app'));
+    cb(null, allowed ? origin : false);
+  },
+  credentials: true,
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
