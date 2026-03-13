@@ -1,0 +1,9 @@
+# Render Web Service – build/start commands
+# TS compiles to dist/server.js at repo root (not src/dist). Start must be "npm start" or "node dist/server.js".
+
+services:
+  - type: web
+    name: talent-forge-ai-backend
+    env: node
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && npm start

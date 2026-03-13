@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { execSync } from 'child_process';
 import { PrismaClient } from '@prisma/client';
 
 // Import routes
@@ -11,6 +12,16 @@ import chatRoutes from './routes/chat';
 import roadmapRoutes from './routes/roadmap';
 
 dotenv.config();
+
+// Run DB migrations in production before starting (so Render can use default "npm start")
+if (process.env.NODE_ENV === 'production') {
+  try {
+    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+  } catch (e) {
+    console.error('Prisma migrate deploy failed:', e);
+    process.exit(1);
+  }
+}
 
 const app = express();
 const prisma = new PrismaClient();
