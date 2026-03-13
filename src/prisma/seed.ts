@@ -460,7 +460,7 @@ async function main() {
         description: p.description,
         deadline: p.deadline,
         duration: p.duration,
-        workType: p.workType,
+        workType: [...p.workType],
         budget: p.budget,
         status: 'open',
         ownerId: p.owner.id,
@@ -613,6 +613,7 @@ async function main() {
   ];
 
   for (const msg of allMessages) {
+    if (!msg.user) continue;
     const ch = getChannel(msg.channelName);
     await prisma.message.create({
       data: {
